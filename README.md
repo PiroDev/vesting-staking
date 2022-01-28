@@ -4,6 +4,6 @@ Implementation of ERC20 staking system with vesting using Solidity (0.8) and Har
 
 Staking system consists of 3 parts:
 
-- CoolRewardToken contract: implementation of ERC20 token used as reward token for staking system.
-- CoolLinearVestingStrategy: implementation of linear vesting strategy with cliff period.
-- CoolVestingStaking: implementation of staking system with vesting for staked tokens.
+- RewardToken contract: implementation of ERC20 token used as reward token for staking system.
+- LinearVesting contract: implementation of linear vesting strategy with cliff period.
+- Staking: implementation of staking system with vesting for staked tokens.
