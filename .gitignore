@@ -6,3 +6,4 @@ typechain
 cache
 artifacts
 .idea
+secret.js
