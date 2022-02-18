@@ -45,6 +45,7 @@ contract Staking is Ownable {
     address[] public whitelisted;
     mapping(address => bool) public isWhitelisted;
     mapping(address => Staker) public stakers;
+    mapping(address => uint) public claimedRewards;
 
     uint public rewardsPool;
     bool public isStarted;
@@ -174,6 +175,8 @@ contract Staking is Ownable {
 
             rewardToken.transfer(msg.sender, staker.unclaimedRewards);
             rewardsPool = rewardsPool.sub(staker.unclaimedRewards);
+            claimedRewards[msg.sender] = claimedRewards[msg.sender].add(staker.unclaimedRewards);
+
             staker.unclaimedRewards = 0;
         }
     }
