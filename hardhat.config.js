@@ -3,8 +3,8 @@ require("@nomiclabs/hardhat-waffle");
 require('solidity-coverage');
 require('hardhat-gas-reporter');
 require('hardhat-contract-sizer');
-require('./tasks/magic.js');
-require('./tasks/mint.js');
+require('tasks/deploy-and-init.js');
+require('tasks/time.js');
 
 const {secret} = require('./secret.js');
 
