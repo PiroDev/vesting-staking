@@ -1,4 +1,16 @@
 const {task} = require('hardhat/config.js');
+const {utils} = require('ethers');
+const fs = require('fs');
+const {BigNumber} = require("ethers");
+
+const numstrToBN = (input, dec = 18) => {
+    if (!input) return BigNumber.from(0);
+    const spl = input.split(".");
+    if (spl[1]?.length > dec) {
+        input = [spl[0], spl[1].slice(0, dec)].join(".");
+    }
+    return utils.parseUnits(input, dec);
+}
 
 const deployAll = async ethers => {
     const [deployer] = await ethers.getSigners();
@@ -26,8 +38,6 @@ const deployAll = async ethers => {
     return {deployer, rewardToken, vesting30Days, vesting60Days, staking};
 }
 
-const fs = require('fs');
-
 const exportContractsInfo = info => {
     const data = JSON.stringify(info, null, 4);
     fs.writeFileSync('artifacts/contracts/info.json', data, (err) => {
@@ -53,25 +63,39 @@ task('magic', 'Compiles, deploys, exports abi\'s and addresses, initializes and 
                 chainId: network.chainId
             }
         };
+
+        const rewardsPerDay1 = numstrToBN('1000');
+        const rewardsPerDay2 = numstrToBN('1250');
+
         exportContractsInfo(info);
         console.log('Initializing vesting 1...');
-        await staking.initializeVesting(1, vesting30Days.address, 1000);
+        await staking.initializeVesting(1, vesting30Days.address, rewardsPerDay1);
         console.log('Done');
 
         console.log('Initializing vesting 2...');
-        await staking.initializeVesting(2, vesting60Days.address, 1250);
+        await staking.initializeVesting(2, vesting60Days.address, rewardsPerDay2);
         console.log('Done');
 
-        const mintAmount = 10000;
+        const mintAmount = numstrToBN('10125.254');
         console.log(`Minting ${mintAmount} tokens...`);
         await rewardToken.mint(deployer.address, mintAmount);
         console.log('Done');
 
+        const initRewards = numstrToBN('10000');
+
         console.log('Approving tokens transfer...');
-        await rewardToken.approve(staking.address, mintAmount);
+        await rewardToken.approve(staking.address, initRewards);
         console.log('Done');
 
         console.log('Starting staking...');
-        await staking.start(mintAmount);
+        await staking.start(initRewards);
         console.log('Done');
+
+        console.log('Adding owner to whitelist...');
+        await staking.addToWhitelist(deployer.address);
+        console.log('Done');
+
+        // console.log('Disabling automining...');
+        // await hre.ethers.provider.send("evm_setAutomine", [false]);
+        // await network.provider.send("evm_setIntervalMining", [3000]);
     });
