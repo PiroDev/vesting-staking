@@ -31,8 +31,15 @@ const deployAll = async ethers => {
     const vesting60Days = await Vesting.deploy(20, 40);
     console.log(`60 days vesting address: ${vesting60Days.address}`);
 
+    console.log('Waiting for tx to be mined...');
+    await rewardToken.deployed();
+    await vesting60Days.deployed();
+    await vesting30Days.deployed();
+    console.log('Done');
+
     console.log('Deploying Staking...');
     const staking = await Staking.deploy(deployer.address, rewardToken.address);
+    await staking.deployed();
     console.log(`Staking address: ${staking.address}`);
 
     return {deployer, rewardToken, vesting30Days, vesting60Days, staking};
@@ -69,35 +76,44 @@ task('deploy-and-init', 'Compiles, deploys, exports abi\'s and addresses, initia
 
         exportContractsInfo(info);
         console.log('Initializing vesting 1...');
-        await staking.initializeVesting(1, vesting30Days.address, rewardsPerDay1);
+        let tx = await staking.initializeVesting(1, vesting30Days.address, rewardsPerDay1);
+        await tx.wait();
         console.log('Done');
 
         console.log('Initializing vesting 2...');
-        await staking.initializeVesting(2, vesting60Days.address, rewardsPerDay2);
+        tx = await staking.initializeVesting(2, vesting60Days.address, rewardsPerDay2);
+        await tx.wait();
         console.log('Done');
 
         const mintAmount = numstrToBN('50125.254');
         console.log(`Minting ${mintAmount} tokens...`);
-        await rewardToken.mint(deployer.address, mintAmount);
+        tx = await rewardToken.mint(deployer.address, mintAmount);
+        await tx.wait();
         console.log('Done');
 
         const initRewards = numstrToBN('40000');
 
         console.log('Approving tokens transfer...');
-        await rewardToken.approve(staking.address, initRewards);
+        tx = await rewardToken.approve(staking.address, initRewards);
+        await tx.wait();
         console.log('Done');
 
         console.log('Starting staking...');
-        await staking.start(initRewards);
+        tx = await staking.start(initRewards);
+        await tx.wait();
         console.log('Done');
 
         console.log('Adding owner to whitelist...');
-        await staking.addToWhitelist(deployer.address);
+        tx = await staking.addToWhitelist(deployer.address);
+        await tx.wait();
         console.log('Done');
 
-        // console.log('Disabling automining...');
-        // await hre.ethers.provider.send("evm_setAutomine", [false]);
-        // await hre.ethers.provider.send("evm_setIntervalMining", [3000]);
+        /* For local testing */
+        /*
+        console.log('Disabling automining...');
+        await hre.ethers.provider.send("evm_setAutomine", [false]);
+        await hre.ethers.provider.send("evm_setIntervalMining", [3000]);
+        */
     });
 
 module.exports = {};
