@@ -132,10 +132,7 @@ contract Staking is Ownable {
         _updateRewardsPerToken(vesting);
         totalStaked[vesting] = totalStaked[vesting].add(amount);
 
-        vestings[vesting].lastUpdateTime = block.timestamp;
-
         staker.rewardsPerToken = vestings[vesting].rewardsPerToken;
-
         staker.stake.initialSize = amount;
         staker.stake.currentSize = amount;
         staker.stake.startTime = block.timestamp;
@@ -159,7 +156,6 @@ contract Staking is Ownable {
 
         _updateRewards(msg.sender);
         totalStaked[staker.vesting] = totalStaked[staker.vesting].sub(amount);
-        vesting.lastUpdateTime = block.timestamp;
 
         rewardToken.transfer(msg.sender, amount);
         staker.stake.currentSize = staker.stake.currentSize.sub(amount);        
@@ -219,8 +215,10 @@ contract Staking is Ownable {
 
         if (block.timestamp > vesting.lastUpdateTime && totalStaked[vestingId] > 0) {
             vesting.rewardsPerToken = vesting.rewardsPerToken.add(
-                ((block.timestamp).sub(vesting.lastUpdateTime)).div(1 days).mul(1e18).div(totalStaked[vestingId])
+                ((block.timestamp).sub(vesting.lastUpdateTime)).mul(1e18).div(totalStaked[vestingId])
             );
+
+            vesting.lastUpdateTime = block.timestamp;
         }
     }
 
@@ -239,7 +237,7 @@ contract Staking is Ownable {
         return staker.unclaimedRewards.add(
             vesting.rewardsPerDay.mul(staker.stake.currentSize)
                                  .mul(vesting.rewardsPerToken.sub(staker.rewardsPerToken))
-                                 .div(1e18)
+                                 .div(1e18).div(1 days)
         );
     }
 
