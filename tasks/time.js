@@ -8,3 +8,5 @@ task('time', 'Increase time 15 days')
         await hre.ethers.provider.send('evm_increaseTime', [timedeltaSeconds]);
         await hre.ethers.provider.send('evm_mine');
     });
+
+module.exports = {};

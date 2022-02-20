@@ -45,7 +45,7 @@ const exportContractsInfo = info => {
     });
 };
 
-task('magic', 'Compiles, deploys, exports abi\'s and addresses, initializes and deploys all contracts')
+task('deploy-and-init', 'Compiles, deploys, exports abi\'s and addresses, initializes and deploys all contracts')
     .setAction(async (args, hre) => {
         await hre.run('compile');
         const {deployer, rewardToken, staking, vesting30Days, vesting60Days} = await deployAll(hre.ethers);
@@ -76,12 +76,12 @@ task('magic', 'Compiles, deploys, exports abi\'s and addresses, initializes and 
         await staking.initializeVesting(2, vesting60Days.address, rewardsPerDay2);
         console.log('Done');
 
-        const mintAmount = numstrToBN('10125.254');
+        const mintAmount = numstrToBN('50125.254');
         console.log(`Minting ${mintAmount} tokens...`);
         await rewardToken.mint(deployer.address, mintAmount);
         console.log('Done');
 
-        const initRewards = numstrToBN('10000');
+        const initRewards = numstrToBN('40000');
 
         console.log('Approving tokens transfer...');
         await rewardToken.approve(staking.address, initRewards);
@@ -97,5 +97,7 @@ task('magic', 'Compiles, deploys, exports abi\'s and addresses, initializes and 
 
         // console.log('Disabling automining...');
         // await hre.ethers.provider.send("evm_setAutomine", [false]);
-        // await network.provider.send("evm_setIntervalMining", [3000]);
+        // await hre.ethers.provider.send("evm_setIntervalMining", [3000]);
     });
+
+module.exports = {};

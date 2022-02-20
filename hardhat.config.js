@@ -3,8 +3,9 @@ require("@nomiclabs/hardhat-waffle");
 require('solidity-coverage');
 require('hardhat-gas-reporter');
 require('hardhat-contract-sizer');
-require('tasks/deploy-and-init.js');
-require('tasks/time.js');
+require('./tasks/deploy-and-init.js');
+require('./tasks/time.js');
+require('@nomiclabs/hardhat-etherscan');
 
 const {secret} = require('./secret.js');
 
@@ -20,4 +21,9 @@ module.exports = {
             'accounts': [secret]
         }
     },
+    etherscan: {
+        apiKey: {
+            'ropsten': "https://api-ropsten.etherscan.io"
+        }
+    }
 };

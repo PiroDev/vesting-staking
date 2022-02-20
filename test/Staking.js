@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-const { Wallet } = require('ethers');
+const { Wallet, BigNumber} = require('ethers');
 const { ethers } = require('hardhat');
 
 describe('Staking contract', () => {
@@ -303,29 +303,6 @@ describe('Staking contract', () => {
 
                 const startTime = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
                 expect(vesting2.lastUpdateTime).to.equal(startTime);
-            });
-
-            it('Should set right rewardsPerToken for contract', async () => {
-                await staking.connect(owner).start(rewardsPoolSize);
-
-                let vesting2 = await staking.vestings(VestingId.DAYS_60);
-                const oldRewardsPerToken = vesting2.rewardsPerToken;
-                const totalStaked = +(await staking.totalStaked(VestingId.DAYS_60));
-
-                const daysStaked = 3;
-                const timedeltaSeconds = daysStaked * day;
-                await ethers.provider.send('evm_increaseTime', [timedeltaSeconds]);
-                await ethers.provider.send('evm_mine');
-
-                await staking.connect(owner).stake(VestingId.DAYS_60, stakeSize);
-
-                vesting2 = await staking.vestings(VestingId.DAYS_60);
-
-                const expectedRewardsPerToken = Math.floor(
-                    oldRewardsPerToken + (timedeltaSeconds / day * 1e18 / totalStaked)
-                );
-
-                expect(vesting2.rewardsPerToken).to.equal(expectedRewardsPerToken.toString());
             });
 
             it('Should revert if caller not in whitelist', async () => {
